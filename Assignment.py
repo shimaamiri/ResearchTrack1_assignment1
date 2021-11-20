@@ -89,7 +89,7 @@ def right_wall():
     """
     dist=100
     for token in R.see():
-        if token.dist < dist and 65<token.rot_y<115 and token.info.marker_type is MARKER_TOKEN_GOLD:
+        if token.dist < dist and 70<token.rot_y<110 and token.info.marker_type is MARKER_TOKEN_GOLD:
             dist=token.dist
 	    rot_y=token.rot_y
     if dist==100:
@@ -108,7 +108,7 @@ def left_wall():
     """
     dist=100
     for token in R.see():
-        if token.dist < dist and -115<token.rot_y<-65 and token.info.marker_type is MARKER_TOKEN_GOLD :
+        if token.dist < dist and -110<token.rot_y<-70 and token.info.marker_type is MARKER_TOKEN_GOLD :
             dist=token.dist
 	    rot_y=token.rot_y
     if dist==100:
@@ -176,4 +176,4 @@ while 1:
  if dist!= -1:
     grab_token(dist,rot_y)
     drive(60,0.1)
- 
+   		
