@@ -82,50 +82,16 @@ def check_wall():
    	return W_th, W_rot_y
    	
    	
-def grab_token(dist,rot_y):
+def avoid_wall(W_rot_y):
     """
-    Function to grab silver tokens
+    Function to avoid crushing into wall
 
-    arguments:
-	dist (float): distance of the closest silver token 
-	rot_y (float): angle between the robot and the silver token 
+    argument:
+	w_rot_y (float): angle between the robot and the closest golden box
     """
-
-    if dist <d_th and -70<rot_y<70: # if we are close to the token, we try grab it.
-        if R.grab(): # if we grab the token, we move the robot forward and on the right, we release the token, and we go back to the initial position
-            print("Gotcha!")
-	    turn(30,2)
-	    drive(30,0.2)
-	    R.release()
-	    drive(-30,0.8)
-	    turn(-30,2)
-	
-    elif -a_th<= rot_y <= a_th: # if the robot is well aligned with the token, we go forward
-	print("Go forward")
-        drive(30, 0.2)
-    elif rot_y < -a_th  and -70<rot_y<70: # if the robot is not well aligned with the token, we move it on the left or on the right
-        print("Left a bit...")
-        turn(-5, 0.2)
-    elif rot_y > a_th and -70<rot_y<70:
-        print("Right a bit...")
-        turn(+5, 0.2)
-	
-
-while 1:
- """
- Main loop, 
- while the conditions are satisfied, it iterates until the user terminate the program 
-    
- """
-
- #obtains initial values 
- dist, rot_y = find_silver_token()
- W_th, W_rot_y = check_wall()
- W_R=[] #list of closest golden tokens located pn the right
- W_L=[] #list of closest golden tokens located pn the left
-
- #if the distance of robot from wall is less than a threshold, we make the robot turn 
- if W_th!=-1:           
+    W_R=[] #list of closest golden tokens located pn the right
+    W_L=[] #list of closest golden tokens located pn the left
+ 
     if -80<W_rot_y<-1: #if the wall is on the left side of the robot
        print("wall...turn right")
        print(W_rot_y)
@@ -148,9 +114,53 @@ while 1:
            print("right")
            turn(4,2)
     else:
-       drive(30,0.1)
-     
-       
+       drive(30,0.1)           
+        	
+        	
+   	
+def grab_token(dist,rot_y):
+    """
+    Function to grab silver tokens
+
+    arguments:
+	dist (float): distance of the closest silver token 
+	rot_y (float): angle between the robot and the silver token 
+    """
+    if dist <d_th and -70<rot_y<70: # if we are close to the token, we try grab it.
+        if R.grab(): # if we grab the token, we move the robot forward and on the right, we release the token, and we go back to the initial position
+            print("Gotcha!")
+	    turn(30,2)
+	    drive(30,0.2)
+	    R.release()
+	    drive(-30,0.8)
+	    turn(-30,2)
+	
+    elif -a_th<= rot_y <= a_th: # if the robot is well aligned with the token, we go forward
+	print("Go forward")
+        drive(30, 0.2)
+    elif rot_y < -a_th  and -70<rot_y<70: # if the robot is not well aligned with the token, we move it on the left or on the right
+        print("Left a bit...")
+        turn(-5, 0.2)
+    elif rot_y > a_th and -70<rot_y<70:
+        print("Right a bit...")
+        turn(+5, 0.2)
+    
+	
+
+while 1:
+ """
+ Main loop, 
+ while the conditions are satisfied, it iterates until the user terminate the program 
+    
+ """
+ #obtains initial values 
+ dist, rot_y = find_silver_token()
+ W_th, W_rot_y = check_wall()
+
+ #if the distance of robot from wall is less than a threshold, we make the robot turn 
+ if W_th!=-1:           
+    avoid_wall(W_rot_y)
+   
  #if the robot has enough distance from wall, it can search for the silver tokens   
  if W_th==-1:  
     if dist==-1 and -70<rot_y<70: # if no token is detected, we make the robot drive 
@@ -159,4 +169,3 @@ while 1:
     else:
         grab_token(dist,rot_y)
         drive(30,0.1)
-
