@@ -49,74 +49,73 @@ def find_silver_token():
 	dist (float): distance of the closest silver token (-1 if no silver token is detected)
 	rot_y (float): angle between the robot and the silver token (-1 if no silver token is detected)
     """
-    dist=4
+    dist=2
     for token in R.see():
         if token.dist < dist and token.info.marker_type is MARKER_TOKEN_SILVER:
             dist=token.dist
 	    rot_y=token.rot_y
-    if dist==4:
+    if dist==2:
 	return -1, -1
     else:
    	return dist, rot_y
    	
- 
-
-def check_wall():
+   	
+def find_golden_token():
     """
-    Function to find the closest golden box
+    Function to find the closest silver token
 
     Returns:
-	w_th (float): distance of the closest golden box (-1 if the robot is not close to any golden box)
-	w_rot_y (float): angle between the robot and the closest golden box (-1 if the robot is not near any golden box)
+	dist (float): distance of the closest golden token (-1 if no golden token is detected)
+	rot_y (float): angle between the robot and the golden token (-1 if no golden token is detected)
     """
- 
-    W_th=0.8
-    W_rot_y=0
+    dist=1
     for token in R.see():
-        if token.dist < W_th and token.info.marker_type is MARKER_TOKEN_GOLD:
-            W_th=token.dist
-	    W_rot_y=token.rot_y
-    if W_th==0.8:
+        if token.dist < dist and -45<token.rot_y<45 and token.info.marker_type is MARKER_TOKEN_GOLD:
+            dist=token.dist
+	    rot_y=token.rot_y
+    if dist==1:
 	return -1, -1
     else:
-   	return W_th, W_rot_y
+   	return dist, rot_y 
    	
    	
-def avoid_wall(W_rot_y):
+def right_wall():
     """
-    Function to avoid crushing into wall
+    Function to find the closest silver token
 
-    argument:
-	w_rot_y (float): angle between the robot and the closest golden box
+    Returns:
+	dist (float): distance of the robot from golden tokens on the right side 
+	rot_y (float): angle between the robot and the golden tokens on the right side
     """
-    W_R=[] #list of closest golden tokens located pn the right
-    W_L=[] #list of closest golden tokens located pn the left
- 
-    if -80<W_rot_y<-1: #if the wall is on the left side of the robot
-       print("wall...turn right")
-       print(W_rot_y)
-       turn(4,2)
-    elif 1<W_rot_y<80: #if the wall is on the right side of the robot
-       print("wall...turn left")
-       print(W_rot_y)
-       turn(-4,2)
-    elif -1<W_rot_y<1: #if the wall is in front of the robot
-       print("wall...front")
-       for token in R.see():
-         if 45<token.rot_y<135 and token.dist < 1.5 and token.info.marker_type is MARKER_TOKEN_GOLD:
-	    W_R.append(token) 
-         if -135<token.rot_y<-45 and token.dist < 1.5 and token.info.marker_type is MARKER_TOKEN_GOLD:
-	    W_L.append(token)
-       if len(W_L)<len(W_R):
-           print("left")
-           turn(-4,2)
-       else:
-           print("right")
-           turn(4,2)
+    dist=100
+    for token in R.see():
+        if token.dist < dist and 65<token.rot_y<115 and token.info.marker_type is MARKER_TOKEN_GOLD:
+            dist=token.dist
+	    rot_y=token.rot_y
+    if dist==100:
+	return -1, -1
     else:
-       drive(30,0.1)           
-        	
-        	
+   	return dist, rot_y
+   	
+   	
+def left_wall():
+    """
+    Function to calculate distance from left wall
+
+    Returns:
+	dist (float): distance of the robot from golden tokens on the left side 
+	rot_y (float): angle between the robot and the golden tokens on the left side 
+    """
+    dist=100
+    for token in R.see():
+        if token.dist < dist and -115<token.rot_y<-65 and token.info.marker_type is MARKER_TOKEN_GOLD :
+            dist=token.dist
+	    rot_y=token.rot_y
+    if dist==100:
+	return -1, -1
+    else:
+   	return dist, rot_y
+   	
    	
 def grab_token(dist,rot_y):
     """
@@ -155,17 +154,26 @@ while 1:
  """
  #obtains initial values 
  dist, rot_y = find_silver_token()
- W_th, W_rot_y = check_wall()
+ g_dist, g_rot_y = find_golden_token()
+ r_dist = right_wall() #distance from left wall
+ l_dist = left_wall()  #distance from left wall
 
- #if the distance of robot from wall is less than a threshold, we make the robot turn 
- if W_th!=-1:           
-    avoid_wall(W_rot_y)
-   
- #if the robot has enough distance from wall, it can search for the silver tokens   
- if W_th==-1:  
-    if dist==-1 and -70<rot_y<70: # if no token is detected, we make the robot drive 
-	print("No silver token!!")
-	drive(30,0.1)
-    else:
-        grab_token(dist,rot_y)
-        drive(30,0.1)
+ #when the robot approaches the wall, changes its orientation	    
+ if g_dist != -1:
+     if (l_dist > r_dist):
+	print("wall..turn left!" )
+	turn(-10, 0.2)	
+     elif (l_dist < r_dist):
+	print("Wall..turn right!") 
+	turn(10,0.2) 
+ 
+ #when there is no silver token, the robot can freely go forward		
+ if dist== -1 and g_dist== -1:
+    print("Go forward!")
+    drive(60,0.1)
+    
+ #when a silver token is detected, the robot trys to catch it		
+ if dist!= -1:
+    grab_token(dist,rot_y)
+    drive(60,0.1)
+ 
